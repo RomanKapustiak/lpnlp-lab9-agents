@@ -1,8 +1,4 @@
-"""System prompts. Both are functions (ADK "instruction providers"): ADK calls them before every LLM call,
-so the prompt always contains the current date/time and the current Canvas state."""
-
 from __future__ import annotations
-
 from datetime import datetime
 
 from google.adk.agents.readonly_context import ReadonlyContext

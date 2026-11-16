@@ -1,5 +1,3 @@
-"""Rendering: charts (Plotly for the app, matplotlib PNG for the PDF) and the report PDF (fpdf2)."""
-
 from __future__ import annotations
 
 import re
@@ -10,20 +8,16 @@ from pathlib import Path
 import markdown as md
 import matplotlib
 
-matplotlib.use("Agg")  # no GUI backend on a server
-import matplotlib.pyplot as plt  # noqa: E402
-import plotly.graph_objects as go  # noqa: E402
-from fpdf import FPDF  # noqa: E402
-from fpdf.fonts import TextStyle  # noqa: E402
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+from fpdf import FPDF
+from fpdf.fonts import TextStyle
 
-from .config import CHART_RE, FONT_DIR, OUT_DIR, TZ  # noqa: E402
-
-# A chart spec (stored in session state by make_line_chart):
-#   {"title": str, "x": [labels], "series": [{"name": str, "values": [numbers]}], "x_label": str, "y_label": str}
+from .config import CHART_RE, FONT_DIR, OUT_DIR, TZ
 
 
-# ─────────────────────────────── Charts ──────────────────────────────────────
-
+# Charts
 def chart_figure(spec: dict) -> go.Figure:
     """Interactive chart for the Canvas in the app (hover shows all lines for one x)."""
     fig = go.Figure()
@@ -62,8 +56,7 @@ def chart_png(spec: dict, path: Path) -> Path:
     return path
 
 
-# ─────────────────────────────── Markdown -> HTML ────────────────────────────
-
+# Markdown -> HTML
 LIST_ITEM_RE = re.compile(r"^(\s*)([-*+]|\d+[.)])\s+")
 
 
@@ -104,8 +97,7 @@ def _fix_table_cell(m: re.Match) -> str:
     return f"<{m[1]}{attrs}>{content}</{m[1]}>"
 
 
-# ─────────────────────────────── PDF ─────────────────────────────────────────
-
+# PDF
 class ReportPDF(FPDF):
     def footer(self):  # page number at the bottom of every page
         self.set_y(-12)

@@ -1,19 +1,3 @@
-"""Universal ReAct agent: Google ADK + Gemini + Streamlit.
-
-Run: streamlit run app.py
-
-Code map:
-  app.py             - this file: Streamlit page and running one agent turn
-  agent/agents.py    - assembling the agents: main ReAct agent + deep_research as a tool
-  agent/prompts.py   - system prompts
-  agent/tools.py     - weather, NBU rates, web search, reading pages
-  agent/canvas.py    - charts and the report document (create / edit)
-  agent/render.py    - charts and PDF rendering
-  agent/ui.py        - rendering chat messages, agent steps and the Canvas
-  agent/tracing.py   - Langfuse
-  agent/config.py    - models, API key, constants
-"""
-
 from __future__ import annotations
 
 import asyncio
@@ -24,7 +8,7 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
 from agent.agents import build_agent, friendly_error, make_model
-from agent.config import APP_NAME, CHART_RE, EMOJI_RE, ENV_API_KEY, MODELS, RUN_CONFIG, USER_ID
+from agent.config import APP_NAME, CHART_RE, ENV_API_KEY, MODELS, RUN_CONFIG, USER_ID
 from agent.tracing import init_langfuse, langfuse_turn, trace_url
 from agent.ui import (DESCRIPTION, EXAMPLES, TOOL_LABELS, format_call, format_result, is_error,
                       render_canvas, render_message, render_step)
@@ -33,9 +17,6 @@ from agent.ui import (DESCRIPTION, EXAMPLES, TOOL_LABELS, format_call, format_re
 async def run_turn(prompt: str, api_key: str, model_name: str) -> dict:
     """Runs the agent on one user message and shows its steps live. Returns the message for the chat history."""
     ss = st.session_state
-    # Streamlit re-executes this script on every interaction, so the agent and Runner are rebuilt each turn
-    # (cheap, and the model can be switched mid-conversation). The conversation itself - history and
-    # state (report, charts) - lives in the ADK session that is kept in st.session_state.
     runner = Runner(app_name=APP_NAME, agent=build_agent(make_model(model_name, api_key)),
                     session_service=ss.adk_service)
     message = types.Content(role="user", parts=[types.Part(text=prompt)])
@@ -72,9 +53,9 @@ async def run_turn(prompt: str, api_key: str, model_name: str) -> dict:
                             widget.markdown("**Результат:**\n\n" + step["result"])
                             widget.update(state=step["state"], expanded=False)
                     elif part.text and event.author == "assistant":  # final answer
-                        turn["text"] += CHART_RE.sub("", EMOJI_RE.sub("", part.text))  # charts live in Canvas
+                        turn["text"] += CHART_RE.sub("", part.text)  # charts live in Canvas
                         text_area.markdown(turn["text"])
-        except Exception as e:  # noqa: BLE001 - e.g. quota exceeded or invalid key
+        except Exception as e:
             step = {"kind": "error", "body": friendly_error(e)}
             turn["steps"].append(step)
             with steps_area:

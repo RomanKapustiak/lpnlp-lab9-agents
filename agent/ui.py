@@ -1,5 +1,3 @@
-"""Streamlit components: texts, agent steps, chat messages and the Canvas panel."""
-
 from __future__ import annotations
 
 import json
@@ -36,7 +34,7 @@ EXAMPLES = [
 ]
 
 
-# ─────────────────────────────── Formatting tool calls ───────────────────────
+# Formatting tool calls
 
 def _short(obj, limit: int = 1500) -> str:
     text = obj if isinstance(obj, str) else json.dumps(obj, ensure_ascii=False, indent=2, default=str)
@@ -69,7 +67,7 @@ def is_error(response) -> bool:
     return isinstance(response, dict) and response.get("status") == "error"
 
 
-# ─────────────────────────────── Chat history ────────────────────────────────
+# Chat history
 # A message is a dict: {"role": "user", "content"} or {"role": "assistant", "steps", "text", "trace_url"}.
 # A step is {"kind": "thought" | "tool" | "error", ...}.
 
@@ -99,8 +97,7 @@ def render_message(msg: dict) -> None:
             st.caption(f"[Трейс у Langfuse]({msg['trace_url']})")
 
 
-# ─────────────────────────────── Canvas ──────────────────────────────────────
-
+# Canvas
 def render_canvas() -> None:
     """Report text with interactive charts in place of [[chart:ID]] placeholders + PDF download."""
     canvas = st.session_state.canvas

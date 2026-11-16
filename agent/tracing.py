@@ -1,6 +1,3 @@
-"""Langfuse tracing. The OpenInference instrumentor creates OpenTelemetry spans for every ADK agent run,
-LLM call and tool call; the Langfuse SDK exports them. One chat turn = one trace."""
-
 from __future__ import annotations
 
 import contextlib

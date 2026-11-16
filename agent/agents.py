@@ -1,13 +1,3 @@
-"""Agent assembly: the main ReAct agent and deep_research (an agent used as a tool).
-
-    assistant (LlmAgent, ReAct)
-    ├── get_weather, get_exchange_rate, search_web, fetch_url   (agent/tools.py)
-    ├── make_line_chart, create_report, edit_report             (agent/canvas.py)
-    └── deep_research = AgentTool(LlmAgent with search_web + fetch_url)
-
-The ReAct loop itself (LLM -> tool call -> tool result -> LLM -> ... -> final answer) is run by ADK.
-"""
-
 from __future__ import annotations
 
 import re
@@ -27,12 +17,11 @@ RESEARCH_BUDGET = {"search_web": 4, "fetch_url": 8}  # max tool calls per resear
 
 
 def make_model(model_name: str, api_key: str) -> Gemini:
-    # retries transient 429/503 errors of the Gemini API
     return Gemini(model=model_name, client_kwargs={"api_key": api_key},
                   retry_options=types.HttpRetryOptions(attempts=3, initial_delay=3.0))
 
 
-# ─────────────────────────────── Errors ──────────────────────────────────────
+# Errors
 
 def friendly_error(err: Exception) -> str:
     """Turns Gemini API errors into a short message for the user."""
@@ -55,7 +44,7 @@ def tool_error_to_result(tool, args, tool_context, error: Exception) -> dict:
     return {"status": "error", "error": friendly_error(error)}
 
 
-# ─────────────────────────────── deep_research ───────────────────────────────
+# deep_research
 
 class ResearchPlan(BaseModel):
     """Input of deep_research. AgentTool uses this schema as the tool's arguments, so the main agent
@@ -98,8 +87,7 @@ def build_research_tool(model) -> AgentTool:
     return AgentTool(deep_research)
 
 
-# ─────────────────────────────── Main agent ──────────────────────────────────
-
+# Main agent
 def build_agent(model) -> LlmAgent:
     return LlmAgent(
         name="assistant",
@@ -116,7 +104,6 @@ def build_agent(model) -> LlmAgent:
             build_research_tool(model),
         ],
         on_tool_error_callback=tool_error_to_result,
-        # include_thoughts: Gemini returns its reasoning, which the UI shows as the "Reason" step of ReAct
         generate_content_config=types.GenerateContentConfig(
             thinking_config=types.ThinkingConfig(include_thoughts=True),
         ),

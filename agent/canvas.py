@@ -1,11 +1,3 @@
-"""Canvas tools: charts and a report document that the agent creates and edits.
-
-Everything lives in the ADK session state, so it survives between turns:
-    state["charts"] = {"chart_1": chart spec, ...}
-    state["report"] = {"title", "markdown", "version", "pdf", "turn"}
-The UI reads this state after every turn and shows the Canvas panel.
-"""
-
 from __future__ import annotations
 
 import json
@@ -13,7 +5,7 @@ import json
 from google.adk.tools import ToolContext
 from pydantic import BaseModel, Field
 
-from .config import CHART_RE, EMOJI_RE
+from .config import CHART_RE
 from .render import render_pdf
 
 
@@ -28,8 +20,7 @@ def _as_list(value) -> list:
     return [value] if isinstance(value, dict) else value
 
 
-# ─────────────────────────────── Charts ──────────────────────────────────────
-
+# Charts
 class ChartSeries(BaseModel):
     name: str = Field(description="Line name (legend)")
     values: list[float] = Field(description="Y values; same length as x")
@@ -74,7 +65,7 @@ def make_line_chart(
     chart_id = replace_chart_id or f"chart_{len(charts) + 1}"
     charts[chart_id] = {"title": title, "x": list(x), "series": [s.model_dump() for s in parsed],
                         "x_label": x_label, "y_label": y_label}
-    tool_context.state["charts"] = charts  # assigning (not mutating) is what makes ADK save the change
+    tool_context.state["charts"] = charts
 
     # the PDF contains a picture of the chart, so a report that uses this chart must be re-rendered
     report = tool_context.state.get("report")
@@ -89,12 +80,11 @@ def make_line_chart(
             "hint": "Щоб додати графік у документ, встав placeholder окремим рядком."}
 
 
-# ─────────────────────────────── Report ──────────────────────────────────────
-
+# Report
 def _save_report(tool_context: ToolContext, title: str, body: str) -> dict:
     """Validates chart placeholders, renders the PDF and stores the report in state.
     Version = number of user turns that changed the document (several saves in one turn = one version)."""
-    title, body = EMOJI_RE.sub("", title).strip(), EMOJI_RE.sub("", body)
+    title = title.strip()
     charts = tool_context.state.get("charts", {})
     missing = sorted(set(CHART_RE.findall(body)) - set(charts))
     if missing:

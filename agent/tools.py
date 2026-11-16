@@ -21,7 +21,7 @@ from ddgs.exceptions import DDGSException
 
 from .config import HTTP_HEADERS, TZ
 
-# ─────────────────────────────── Weather ─────────────────────────────────────
+# Weather
 
 # WMO weather codes used by Open-Meteo
 WMO = {
@@ -95,8 +95,7 @@ async def get_weather(city: str, days: int = 3) -> dict:
     }
 
 
-# ─────────────────────────────── Exchange rates ──────────────────────────────
-
+# Exchange rates
 async def get_exchange_rate(currency: str, start_date: str = "", end_date: str = "") -> dict:
     """Official hryvnia exchange rate from the National Bank of Ukraine: for one date or a period (up to 1 year).
 
@@ -145,9 +144,7 @@ async def get_exchange_rate(currency: str, start_date: str = "", end_date: str =
         "points": points,
     }
 
-
-# ─────────────────────────────── Web search ──────────────────────────────────
-
+# Web search
 def _ddg_search(query: str, max_results: int, timelimit: str | None) -> list[dict]:
     """One DuckDuckGo query. DDG sometimes randomly answers "No results", so we retry a couple of times."""
     region = "ua-uk" if re.search("[а-яіїєґ]", query, re.IGNORECASE) else "wt-wt"
@@ -200,8 +197,7 @@ async def search_web(queries: list[str], max_results: int = 5, time_range: str =
     return {"status": "ok", "results_by_query": by_query, "errors": errors}
 
 
-# ─────────────────────────────── Reading a page ──────────────────────────────
-
+# Reading a page
 class _TextExtractor(HTMLParser):
     """Minimal HTML -> text: skips scripts/menus/footers, keeps paragraph breaks."""
 
