@@ -1,14 +1,3 @@
----
-title: Universal ReAct Agent
-colorFrom: indigo
-colorTo: blue
-sdk: streamlit
-sdk_version: 1.67.0
-app_file: app.py
-pinned: false
-license: mit
----
-
 # Універсальний ReAct-агент з Canvas і Deep Research
 
 **Задача.** Універсальний асистент, який сам вирішує, якими інструментами скористатися: дізнатися погоду,
@@ -18,8 +7,8 @@ license: mit
 
 **Стек:** Google ADK (`google-adk`) + Gemini, Streamlit, Langfuse, Plotly / matplotlib, fpdf2.
 
-- Застосунок: `<посилання на HF Space>`
-- Код: `<посилання на репозиторій>`
+- Застосунок: `<посилання на *.streamlit.app>`
+- Код: https://github.com/RomanKapustiak/lpnlp-lab9-agents
 
 ## Архітектура
 
@@ -106,10 +95,11 @@ streamlit run app.py     # http://localhost:8501
 API-ключ Gemini ([Google AI Studio](https://aistudio.google.com/apikey)) вводиться в інтерфейсі
 й не зберігається. Для локальної розробки ключ можна покласти в `.env` поруч з `app.py`
 (`GEMINI_API_KEY`, `LANGFUSE_*`); цей файл не потрапляє в git.
-На HF Spaces ключі Langfuse задаються як Secrets Space.
 
-**Деплой на HF Spaces:** Space з SDK *Streamlit*; у репозиторій Space завантажити `app.py`,
-папку `agent/`, `requirements.txt`, `README.md` (YAML-блок на початку README задає SDK і версію Streamlit).
+**Деплой на Streamlit Community Cloud:** застосунок з цього GitHub-репозиторію, main file path
+`app.py` (залежності беруться з `requirements.txt` поруч), Python 3.12.
+Ключі Langfuse задаються в *Advanced settings → Secrets* (Streamlit передає їх у змінні оточення).
+HF Spaces не використовується, бо ZeroGPU підтримує лише Gradio SDK.
 
 ## Приклади запитів
 - «Яка погода буде у Львові найближчі 7 днів? Побудуй графік мін/макс температури.»
